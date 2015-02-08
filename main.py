@@ -51,7 +51,7 @@ def updateScreen(loop, data):
 	users = psutil.users()
 	usersstr = ''
 	for user in users:
-		usersstr = usersstr + user.name + '@' + user.host + ' on ' + user.terminal + ' logged in on ' + str(datetime.datetime.fromtimestamp(user.started).strftime("%Y-%m-%d at %H:%M:%S") + '\n')
+		usersstr = usersstr + user.name + '@' + user.host + ' on ' + user.terminal + ' logged in on ' + str(datetime.datetime.fromtimestamp(user.started).strftime("%Y-%m-%d at %H:%M:%S") + '\n\n')
 
 	userstxt.set_text(usersstr[:-2])
 
