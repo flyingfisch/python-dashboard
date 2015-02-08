@@ -18,9 +18,11 @@ def secToStr(sec):
 
 def getProcesses():
 	pinfo = []
+	processcount = 0
 	for proc in psutil.process_iter():
 		try:
 			pinfo.append(proc.as_dict(attrs=['pid', 'name', 'cpu_percent']))
+			processcount += 1
 		except psutil.NoSuchProcess:
 			pass
 
@@ -30,7 +32,7 @@ def getProcesses():
 	for proc in procs:
 		procstr += str(proc['cpu_percent']) + '% ' + proc['name'] + '\n'
 
-	return procstr
+	return (processcount, procstr)
 
 
 
@@ -50,9 +52,12 @@ def updateScreen(loop, data):
 
 	users = psutil.users()
 	usersstr = ''
+	usercount = 0
 	for user in users:
 		usersstr = usersstr + user.name + '@' + user.host + ' on ' + user.terminal + ' logged in on ' + str(datetime.datetime.fromtimestamp(user.started).strftime("%Y-%m-%d at %H:%M:%S") + '\n\n')
+		usercount += 1
 
+	userstitle.set_text(('title', 'Logged in users (' + str(usercount) + ')'))
 	userstxt.set_text(usersstr[:-2])
 
 	boot = datetime.datetime.fromtimestamp(psutil.boot_time())
@@ -60,7 +65,9 @@ def updateScreen(loop, data):
 	uptime = secToStr(uptime.seconds)
 	uptimetxt.set_text(uptime)
 
-	processtxt.set_text(getProcesses())
+	(pcount, pinfo) = getProcesses()
+	processtitle.set_text(('title', 'Running Processes(' + str(pcount) + ')'))
+	processtxt.set_text(pinfo)
 
 	loop.set_alarm_in(refresh_rate, updateScreen)
 
@@ -118,7 +125,7 @@ usersstr = ''
 userstxt = urwid.Text(usersstr)
 
 processtitle = urwid.Text(('title', 'Running Processes'))
-pinfo = getProcesses()
+(pcount, pinfo) = getProcesses()
 processtxt = urwid.Text(pinfo)
 
 frame1 = urwid.ListBox(
