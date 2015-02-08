@@ -4,6 +4,7 @@ import time
 import platform
 import psutil
 import datetime
+import subprocess
 
 refresh_rate = 1
 
@@ -65,6 +66,11 @@ def updateScreen(loop, data):
 	uptime = secToStr(uptime.seconds)
 	uptimetxt.set_text(uptime)
 
+	p = subprocess.Popen('last', stdout=subprocess.PIPE, shell=True)
+	(output, err) = p.communicate()
+	p.wait()
+	logintxt.set_text(output)
+
 	(pcount, pinfo) = getProcesses()
 	processtitle.set_text(('title', 'Running Processes(' + str(pcount) + ')'))
 	processtxt.set_text(pinfo)
@@ -124,6 +130,12 @@ userstitle = urwid.Text(('title', 'Logged in users'))
 usersstr = ''
 userstxt = urwid.Text(usersstr)
 
+logintitle = urwid.Text(('title', 'Login/uptime log'))
+p = subprocess.Popen('last', stdout=subprocess.PIPE, shell=True)
+(output, err) = p.communicate()
+p.wait()
+logintxt = urwid.Text(output)
+
 processtitle = urwid.Text(('title', 'Running Processes'))
 (pcount, pinfo) = getProcesses()
 processtxt = urwid.Text(pinfo)
@@ -142,7 +154,8 @@ frame1 = urwid.AttrMap(frame1, 'bg')
 frame2 = urwid.ListBox(
 		[
 			uptimetitle, uptimetxt, divider,
-			userstitle, userstxt, divider
+			userstitle, userstxt, divider,
+			logintitle, logintxt, divider
 		])
 frame2 = urwid.AttrMap(frame2, 'bg')
 frame2 = urwid.Padding(frame2, left=1)
