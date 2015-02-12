@@ -1,5 +1,3 @@
-
-
 #! /usr/bin/python
 import urwid
 import time
