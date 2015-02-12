@@ -51,14 +51,6 @@ def updateScreen(loop, data):
 	swapinfo.set_text('Total: ' + str(swap.total / 1024 ** 2) + 'MB, Free: ' + str(swap.free / 1024 ** 2) + 'MB')
 	swapbar.set_completion(swap.percent)
 
-	diskmain = psutil.disk_usage('/')
-	diskmainbar.set_completion(diskmain.percent)
-	diskmaininfo.set_text('Total: ' + str(diskmain.total / 1024 ** 3) + 'GB, Free: ' + str(diskmain.free / 1024 ** 3) + 'GB')
-
-	diskhome = psutil.disk_usage('/home')
-	diskhomebar.set_completion(diskhome.percent)
-	diskhomeinfo.set_text('Total: ' + str(diskhome.total / 1024 ** 3) + 'GB, Free: ' + str(diskhome.free / 1024 ** 3) + 'GB')
-
 	users = psutil.users()
 	usersstr = ''
 	usercount = 0
