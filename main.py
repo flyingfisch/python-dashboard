@@ -12,10 +12,10 @@ def exit_on_q(key):
 	if key in ('q', 'Q'):
 		raise urwid.ExitMainLoop()
 
-def secToStr(time):
-	d = datetime.datetime(1, 1, 1) + datetime.timedelta(seconds=time.seconds)
+def secToStr(sec):
+	d = datetime.datetime(1, 1, 1) + datetime.timedelta(seconds=sec)
 
-	return str(time.days) + ' days, ' + str(d.hour) + ' hours, ' + str(d.minute) + ' minutes, ' + str(d.second) + ' seconds.'
+	return str(d.day - 1) + ' days, ' + str(d.hour) + ' hours, ' + str(d.minute) + ' minutes, ' + str(d.second) + ' seconds.'
 
 def getProcesses():
 	pinfo = []
@@ -63,7 +63,7 @@ def updateScreen(loop, data):
 
 	boot = datetime.datetime.fromtimestamp(psutil.boot_time())
 	uptime = datetime.datetime.now() - boot
-	uptime = secToStr(uptime)
+	uptime = secToStr(uptime.seconds)
 	uptimetxt.set_text(uptime)
 
 	p = subprocess.Popen('last', stdout=subprocess.PIPE, shell=True)
@@ -123,7 +123,7 @@ diskhomeinfo = urwid.Text('Total: ' + str(diskhome.total / 1024 ** 3) + 'GB, Fre
 uptimetitle = urwid.Text(('title', 'Uptime'))
 boot = datetime.datetime.fromtimestamp(psutil.boot_time())
 uptime = datetime.datetime.now() - boot
-uptime = secToStr(uptime)
+uptime = secToStr(uptime.seconds)
 uptimetxt = urwid.Text(uptime)
 
 userstitle = urwid.Text(('title', 'Logged in users'))
