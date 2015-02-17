@@ -6,6 +6,7 @@ import psutil
 import datetime
 import subprocess
 
+
 refresh_rate = 1
 
 def exit_on_q(key):
