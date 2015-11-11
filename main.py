@@ -10,90 +10,92 @@ import subprocess
 refresh_rate = 1
 
 def exit_on_q(key):
-	if key in ('q', 'Q'):
-		raise urwid.ExitMainLoop()
+    if key in ('q', 'Q'):
+        raise urwid.ExitMainLoop()
 
 def secToStr(time):
-	d = datetime.datetime(1, 1, 1) + datetime.timedelta(seconds=time.seconds)
+    d = datetime.datetime(1, 1, 1) + datetime.timedelta(seconds=time.seconds)
 
-	return str(time.days) + ' days, ' + str(d.hour) + ' hours, ' + str(d.minute) + ' minutes, ' + str(d.second) + ' seconds.'
+    return str(time.days) + ' days, ' + str(d.hour) + ' hours, ' + str(d.minute) + ' minutes, ' + str(d.second) + ' seconds.'
 
 def getProcesses():
-	pinfo = []
-	processcount = 0
-	for proc in psutil.process_iter():
-		try:
-			pinfo.append(proc.as_dict(attrs=['pid', 'name', 'cpu_percent']))
-			processcount += 1
-		except psutil.NoSuchProcess:
-			pass
+    pinfo = []
+    processcount = 0
+    for proc in psutil.process_iter():
+        try:
+            pinfo.append(proc.as_dict(attrs=['pid', 'name', 'cpu_percent']))
+            processcount += 1
+        except psutil.NoSuchProcess:
+            pass
 
-	procs = sorted(pinfo, key = lambda proc: 100 - proc['cpu_percent'])
-	procstr = ''
+    procs = sorted(pinfo, key = lambda proc: 100 - proc['cpu_percent'])
+    procstr = ''
 
-	for proc in procs:
-		procstr += str(proc['cpu_percent']) + '% ' + proc['name'] + '\n'
+    for proc in procs:
+        procstr += str(proc['cpu_percent']) + '% ' + proc['name'] + '\n'
 
-	return (processcount, procstr)
+    return (processcount, procstr)
 
 
 
 def updateScreen(loop, data):
-	t = datetime.datetime.now()
-	bannertxt.set_text(('green', platform.node() + ' ' + t.strftime('%m/%d/%Y %H:%M:%S')))
+    t = datetime.datetime.now()
+    bannertxt.set_text(('green', platform.node() + ' ' + t.strftime('%m/%d/%Y %H:%M:%S')))
 
-	cpubar.set_completion(psutil.cpu_percent())
+    cpubar.set_completion(psutil.cpu_percent())
 
-	mem = psutil.virtual_memory()
-	meminfo.set_text('Total: ' + str(mem.total / 1024 ** 2) + 'MB, Available: ' + str(mem.available / 1024 ** 2) + 'MB')
-	membar.set_completion(mem.percent)
+    mem = psutil.virtual_memory()
+    meminfo.set_text('Total: ' + str(mem.total / 1024 ** 2) + 'MB, Available: ' + str(mem.available / 1024 ** 2) + 'MB')
+    membar.set_completion(mem.percent)
 
-	swap = psutil.swap_memory()
-	swapinfo.set_text('Total: ' + str(swap.total / 1024 ** 2) + 'MB, Free: ' + str(swap.free / 1024 ** 2) + 'MB')
-	swapbar.set_completion(swap.percent)
+    swap = psutil.swap_memory()
+    swapinfo.set_text('Total: ' + str(swap.total / 1024 ** 2) + 'MB, Free: ' + str(swap.free / 1024 ** 2) + 'MB')
+    swapbar.set_completion(swap.percent)
 
-	diskmain = psutil.disk_usage('/')
-	diskmainbar.set_completion(diskmain.percent)
-	diskmaininfo.set_text('Total: ' + str(diskmain.total / 1024 ** 3) + 'GB, Free: ' + str(diskmain.free / 1024 ** 3) + 'GB')
+    diskmain = psutil.disk_usage('/')
+    diskmainbar.set_completion(diskmain.percent)
+    diskmaininfo.set_text('Total: ' + str(diskmain.total / 1024 ** 3) + 'GB, Free: ' + str(diskmain.free / 1024 ** 3) + 'GB')
 
-	diskhome = psutil.disk_usage('/home')
-	diskhomebar.set_completion(diskhome.percent)
-	diskhomeinfo.set_text('Total: ' + str(diskhome.total / 1024 ** 3) + 'GB, Free: ' + str(diskhome.free / 1024 ** 3) + 'GB')
+    # Uncomment this if you have your home directory on another partition
+    # TODO: Detect this automatically
+    #diskhome = psutil.disk_usage('/home')
+    #diskhomebar.set_completion(diskhome.percent)
+    #diskhomeinfo.set_text('Total: ' + str(diskhome.total / 1024 ** 3) + 'GB, Free: ' + str(diskhome.free / 1024 ** 3) + 'GB')
 
-	users = psutil.users()
-	usersstr = ''
-	usercount = 0
-	for user in users:
-		usersstr = usersstr + user.name + '@' + user.host + ' on ' + user.terminal + ' logged in on ' + str(datetime.datetime.fromtimestamp(user.started).strftime("%Y-%m-%d at %H:%M:%S") + '\n\n')
-		usercount += 1
+    users = psutil.users()
+    usersstr = ''
+    usercount = 0
+    for user in users:
+        usersstr = usersstr + user.name + '@' + user.host + ' on ' + user.terminal + ' logged in on ' + str(datetime.datetime.fromtimestamp(user.started).strftime("%Y-%m-%d at %H:%M:%S") + '\n\n')
+        usercount += 1
 
-	userstitle.set_text(('title', 'Logged in users (' + str(usercount) + ')'))
-	userstxt.set_text(usersstr[:-2])
+    userstitle.set_text(('title', 'Logged in users (' + str(usercount) + ')'))
+    userstxt.set_text(usersstr[:-2])
 
-	boot = datetime.datetime.fromtimestamp(psutil.boot_time())
-	uptime = datetime.datetime.now() - boot
-	uptime = secToStr(uptime)
-	uptimetxt.set_text(uptime)
+    boot = datetime.datetime.fromtimestamp(psutil.boot_time())
+    uptime = datetime.datetime.now() - boot
+    uptime = secToStr(uptime)
+    uptimetxt.set_text(uptime)
 
-	p = subprocess.Popen('last', stdout=subprocess.PIPE, shell=True)
-	(output, err) = p.communicate()
-	p.wait()
-	logintxt.set_text(output)
+    p = subprocess.Popen('last', stdout=subprocess.PIPE, shell=True)
+    (output, err) = p.communicate()
+    p.wait()
+    logintxt.set_text(output)
 
-	(pcount, pinfo) = getProcesses()
-	processtitle.set_text(('title', 'Running Processes(' + str(pcount) + ')'))
-	processtxt.set_text(pinfo)
+    (pcount, pinfo) = getProcesses()
+    processtitle.set_text(('title', 'Running Processes(' + str(pcount) + ')'))
+    processtxt.set_text(pinfo)
 
-	loop.set_alarm_in(refresh_rate, updateScreen)
+    loop.set_alarm_in(refresh_rate, updateScreen)
 
 palette = [
-		('bg', 'white', 'black'),
-		('streak', 'dark green, bold', 'black'),
-		('title', 'dark green, bold', 'black'),
-		('green', 'black', 'dark green'),
-		('divider', 'dark blue', 'black'),
-		('gray', 'black', 'light gray')
-		]
+        ('bg', 'white', 'black'),
+        ('streak', 'dark green, bold', 'black'),
+        ('title', 'dark green, bold', 'black'),
+        ('green', 'black', 'dark green'),
+        ('divider', 'dark blue', 'black'),
+        ('gray', 'black', 'light gray')
+        ]
 
 bannertxt = urwid.Text(('green', platform.node()), align='center')
 banner = urwid.Filler(bannertxt, valign='top', height='pack')
@@ -124,10 +126,12 @@ diskmaintxt = urwid.Text('/')
 diskmainbar = urwid.ProgressBar('gray', 'green', diskmain.percent)
 diskmaininfo = urwid.Text('Total: ' + str(diskmain.total / 1024 ** 3) + 'GB, Free: ' + str(diskmain.free / 1024 ** 3) + 'GB')
 
-diskhome = psutil.disk_usage('/home')
-diskhometxt = urwid.Text('/home')
-diskhomebar = urwid.ProgressBar('gray', 'green', diskhome.percent)
-diskhomeinfo = urwid.Text('Total: ' + str(diskhome.total / 1024 ** 3) + 'GB, Free: ' + str(diskhome.free / 1024 ** 3) + 'GB')
+# Uncomment this if you have your home directory on another partition
+# TODO: Detect this automatically
+#diskhome = psutil.disk_usage('/home')
+#diskhometxt = urwid.Text('/home')
+#diskhomebar = urwid.ProgressBar('gray', 'green', diskhome.percent)
+#diskhomeinfo = urwid.Text('Total: ' + str(diskhome.total / 1024 ** 3) + 'GB, Free: ' + str(diskhome.free / 1024 ** 3) + 'GB')
 
 uptimetitle = urwid.Text(('title', 'Uptime'))
 boot = datetime.datetime.fromtimestamp(psutil.boot_time())
@@ -150,22 +154,23 @@ processtitle = urwid.Text(('title', 'Running Processes'))
 processtxt = urwid.Text(pinfo)
 
 frame1 = urwid.ListBox(
-		[
-			cputxt, cpubar, cpuinfo, divider,
-			memtxt, membar, meminfo, divider,
-			swaptxt, swapbar, swapinfo, divider,
-			disktxt, diskmaintxt, diskmainbar, diskmaininfo,
-			divider2, diskhometxt, diskhomebar, diskhomeinfo,
-		])
+        [
+            cputxt, cpubar, cpuinfo, divider,
+            memtxt, membar, meminfo, divider,
+            swaptxt, swapbar, swapinfo, divider,
+            disktxt, diskmaintxt, diskmainbar, diskmaininfo,
+            #TODO: Detect lack of home partition automatically
+            #divider2, diskhometxt, diskhomebar, diskhomeinfo,
+        ])
 
 frame1 = urwid.AttrMap(frame1, 'bg')
 
 frame2 = urwid.ListBox(
-		[
-			uptimetitle, uptimetxt, divider,
-			userstitle, userstxt, divider,
-			logintitle, logintxt, divider
-		])
+        [
+            uptimetitle, uptimetxt, divider,
+            userstitle, userstxt, divider,
+            logintitle, logintxt, divider
+        ])
 frame2 = urwid.AttrMap(frame2, 'bg')
 frame2 = urwid.Padding(frame2, left=1)
 
